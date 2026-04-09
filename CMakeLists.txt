@@ -10,6 +10,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+if(MINGW)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+    add_link_options(-static)
+endif()
+
 # Find OpenMP
 find_package(OpenMP REQUIRED)
 

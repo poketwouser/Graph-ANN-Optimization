@@ -4,6 +4,14 @@
 #include <string>
 #include <memory>
 
+#ifdef _WIN32
+#include <malloc.h>
+inline void portable_free(void* ptr) { _aligned_free(ptr); }
+#else
+#include <cstdlib>
+inline void portable_free(void* ptr) { std::free(ptr); }
+#endif
+
 // Reads a .fbin file: 4 bytes npts (uint32), 4 bytes dims (uint32),
 // then npts * dims floats in row-major order.
 // Returns aligned memory for SIMD-friendly access.
@@ -13,7 +21,7 @@ struct FloatMatrix {
     uint32_t npts;
     uint32_t dims;
 
-    FloatMatrix() : data(nullptr, std::free), npts(0), dims(0) {}
+    FloatMatrix() : data(nullptr, portable_free), npts(0), dims(0) {}
 
     const float* row(uint32_t i) const { return data.get() + (size_t)i * dims; }
     float*       row(uint32_t i)       { return data.get() + (size_t)i * dims; }
@@ -26,7 +34,7 @@ struct IntMatrix {
     uint32_t npts;
     uint32_t dims;
 
-    IntMatrix() : data(nullptr, std::free), npts(0), dims(0) {}
+    IntMatrix() : data(nullptr, portable_free), npts(0), dims(0) {}
 
     const uint32_t* row(uint32_t i) const { return data.get() + (size_t)i * dims; }
     uint32_t*       row(uint32_t i)       { return data.get() + (size_t)i * dims; }

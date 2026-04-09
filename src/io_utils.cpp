@@ -8,7 +8,11 @@
 static void* aligned_alloc_wrapper(size_t size) {
     // Round up to multiple of 64 for aligned_alloc requirement
     size_t aligned_size = (size + 63) & ~(size_t)63;
+#ifdef _WIN32
+    void* ptr = _aligned_malloc(aligned_size, 64);
+#else
     void* ptr = std::aligned_alloc(64, aligned_size);
+#endif
     if (!ptr)
         throw std::runtime_error("Failed to allocate " + std::to_string(size) + " bytes");
     return ptr;

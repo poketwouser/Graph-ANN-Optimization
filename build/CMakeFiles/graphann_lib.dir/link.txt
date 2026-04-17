@@ -1,0 +1,2 @@
+C:\msys64\mingw64\bin\ar.exe qc libgraphann_lib.a CMakeFiles/graphann_lib.dir/src/distance.cpp.obj CMakeFiles/graphann_lib.dir/src/io_utils.cpp.obj CMakeFiles/graphann_lib.dir/src/vamana_index.cpp.obj
+C:\msys64\mingw64\bin\ranlib.exe libgraphann_lib.a

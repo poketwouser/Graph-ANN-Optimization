@@ -1,8 +1,44 @@
-# GraphANN — Educational Vamana Index
+# GraphANN — Vamana Index + **AdaptiveVamana**
 
-A clean, modular C++ implementation of the **Vamana graph-based approximate nearest neighbor (ANN) index** for students to learn, experiment with, and extend.
+A clean, modular C++ implementation of the **Vamana graph-based approximate nearest neighbor (ANN) index**, extended into **AdaptiveVamana**: a workload-aware, cluster-routed ANN system.
 
 Implements the core algorithm from [*DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node*](https://proceedings.neurips.cc/paper/2019/hash/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Abstract.html) (NeurIPS 2019).
+
+> ## AdaptiveVamana
+> On SIFT1M, vs. the original baseline (96.6% Recall@10, 1510 distance comps, ~708 µs/query):
+> - **At matched recall**: −23% distance computations, **−30% latency**, +42% throughput, −22% graph memory.
+> - **Tuned for accuracy**: **Recall@10 96.6% → 98.4%**.
+> - ~864× fewer candidate evaluations than exhaustive search.
+>
+> Enhancements (all flag-gated; baseline is fully recoverable):
+> **F0** optimized search engine · **F1** K-Means query routing (route-only + IVF) ·
+> **F3** adaptive beam width · **F4** edge-usage graph refinement · plus F2/F5/F6 (ablated).
+>
+> See **`docs/REPORT.md`** (architecture, algorithms, complexity, STAR narrative, resume bullets),
+> **`docs/BENCHMARKS.md`** (all tables), **`docs/PROGRESS.md`** (per-feature change log).
+
+### AdaptiveVamana quick start
+```bash
+# 1. Build the base Vamana graph (optionally edge-refined later)
+build_index   --data base.fbin --output index.bin --R 32 --L 75 --alpha 1.2 --gamma 1.5
+
+# 2. Offline K-Means clusters for routing (Feature 1)
+build_clusters --data base.fbin --output clusters_64.bin --num-clusters 64
+
+# 3. (Optional) Workload-aware edge refinement on a HELD-OUT set (Feature 4)
+refine_index  --index index.bin --data base.fbin --workload learn.fbin \
+              --output index_refined.bin --keep-min 20 --min-count 1
+
+# 4. Final system: routing + adaptive beam (Features 1+3 on the refined graph)
+search_index  --index index_refined.bin --data base.fbin --queries query.fbin --gt gt.ibin \
+              --K 10 --final --clusters clusters_64.bin --clusters-to-search 2 \
+              --min-beam 35 --max-beam 90 --patience 10 --epsilon 0.004
+```
+
+**Search modes** (`search_index`): default fixed-`L` · `--legacy-search` (original engine) ·
+`--adaptive` (F3) · `--clusters … [--route-only | --clusters-to-search N]` (F1) ·
+`--hubs H --random-entries R` (F2) · `--final` (routing + adaptive).
+**Build options**: `--clusters … --diversity S` (F5) · `--noise RATIO` (F6).
 
 ---
 

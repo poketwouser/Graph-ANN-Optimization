@@ -46,7 +46,7 @@ FloatMatrix load_fbin(const std::string& path) {
     mat.npts = npts;
     mat.dims = dims;
     mat.data = std::unique_ptr<float[], void(*)(void*)>(
-        static_cast<float*>(aligned_alloc_wrapper(data_size)), std::free);
+        static_cast<float*>(aligned_alloc_wrapper(data_size)), portable_free);
 
     in.read(reinterpret_cast<char*>(mat.data.get()), data_size);
     if (!in.good())
@@ -82,7 +82,7 @@ IntMatrix load_ibin(const std::string& path) {
     mat.npts = npts;
     mat.dims = dims;
     mat.data = std::unique_ptr<uint32_t[], void(*)(void*)>(
-        static_cast<uint32_t*>(aligned_alloc_wrapper(data_size)), std::free);
+        static_cast<uint32_t*>(aligned_alloc_wrapper(data_size)), portable_free);
 
     in.read(reinterpret_cast<char*>(mat.data.get()), data_size);
     if (!in.good())
